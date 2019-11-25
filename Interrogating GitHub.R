@@ -36,9 +36,26 @@ gitDF[gitDF$full_name == "laurastack9/datasharing", "created_at"]
 
 #Interrogate the Github API to extract data from my own github account
 myData = fromJSON("https://api.github.com/users/laurastack9")
-myData$followers #dispalys number of followers
+
+#displays number of followers
+myData$followers 
+
+followers = fromJSON("https://api.github.com/users/laurastack9/followers")
+followers$login #gives user names of all my followers
+
 myData$following #displays number of people I am following
+
+following = fromJSON("https://api.github.com/users/laurastack9/following")
+following$login #gives the names of all the people I am following
+
 myData$public_repos #displays the number of repositories I have
+
+repos = fromJSON("https://api.github.com/users/laurastack9/repos")
+repos$name #Gives of the names of my public repositories
+repos$created_at #Gives details of the dates the repositories were created 
+repos$full_name #gives names of repositiories
+
+
 myData$bio #Displays my bio
 
 #Interrogate the Github API to extract data from another account by switching the username
