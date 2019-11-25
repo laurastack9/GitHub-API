@@ -33,3 +33,19 @@ gitDF = jsonlite::fromJSON(jsonlite::toJSON(json1))
 gitDF[gitDF$full_name == "laurastack9/datasharing", "created_at"]
 
 #above code sourced from https://towardsdatascience.com/accessing-data-from-github-api-using-r-3633fb62cb08
+
+#Interrogate the Github API to extract data from my own github account
+myData = fromJSON("https://api.github.com/users/laurastack9")
+myData$followers #dispalys number of followers
+myData$following #displays number of people I am following
+myData$public_repos #displays the number of repositories I have
+myData$bio #Displays my bio
+
+#Interrogate the Github API to extract data from another account by switching the username
+ebroderiData = fromJSON("https://api.github.com/users/ebroderi")
+ebroderiData$followers
+ebroderiData$following 
+ebroderiData$public_repos 
+ebroderiData$bio 
+
+
