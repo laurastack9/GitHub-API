@@ -1,6 +1,6 @@
-#install.packages("jsonlite")
+install.packages("jsonlite")
 library(jsonlite)
-#install.packages("httpuv")
+install.packages("httpuv")
 library(httpuv)
 #install.packages("httr")
 library(httr)
@@ -30,4 +30,6 @@ json1 = content(req)
 gitDF = jsonlite::fromJSON(jsonlite::toJSON(json1))
 
 # Subset data.frame
-gitDF[gitDF$full_name == "laurastack9/datasharing", "created_at"] 
+gitDF[gitDF$full_name == "laurastack9/datasharing", "created_at"]
+
+#above code sourced from https://towardsdatascience.com/accessing-data-from-github-api-using-r-3633fb62cb08
