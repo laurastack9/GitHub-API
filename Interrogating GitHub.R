@@ -58,11 +58,105 @@ repos$full_name #gives names of repositiories
 
 myData$bio #Displays my bio
 
+LCARepos <- fromJSON("https://api.github.com/repos/laurastack9/lstack-lca-repository/commits")
+LCARepos$commit$message #The details I included describing each commit to LCA assignment repository 
+
+
 #Interrogate the Github API to extract data from another account by switching the username
 ebroderiData = fromJSON("https://api.github.com/users/ebroderi")
-ebroderiData$followers
-ebroderiData$following 
-ebroderiData$public_repos 
+ebroderiData$followers #lists num followers ebroderi has
+ebroderiData$following #lists number of people ebroderi follows
+ebroderiData$public_repos #lists number of repositories ebroderi has
 ebroderiData$bio 
+
+#Part 2 - Visualisations
+
+myData = GET("https://api.github.com/users/laurastack9/followers?per_page=100;", gtoken)
+stop_for_status(myData)
+extract = content(myData)
+#converts into dataframe
+githubDB = jsonlite::fromJSON(jsonlite::toJSON(extract))
+githubDB$login
+
+# Retrieve a list of usernames
+id = githubDB$login
+user_ids = c(id)
+
+# Create an empty vector and data.frame
+users = c()
+usersDB = data.frame(
+  username = integer(),
+  following = integer(),
+  followers = integer(),
+  repos = integer(),
+  dateCreated = integer()
+)
+
+#loops through users and adds to list
+for(i in 1:length(user_ids))
+{
+  
+  followingURL = paste("https://api.github.com/users/", user_ids[i], "/following", sep = "")
+  followingRequest = GET(followingURL, gtoken)
+  followingContent = content(followingRequest)
+  
+  #Does not add users if they have no followers
+  if(length(followingContent) == 0)
+  {
+    next
+  }
+  
+  followingDF = jsonlite::fromJSON(jsonlite::toJSON(followingContent))
+  followingLogin = followingDF$login
+  
+  #Loop through 'following' users
+  for (j in 1:length(followingLogin))
+  {
+    #Check that the user is not already in the list of users
+    if (is.element(followingLogin[j], users) == FALSE)
+    {
+      #Add user to list of users
+      users[length(users) + 1] = followingLogin[j]
+      
+      #Retrieve data on each user
+      followingUrl2 = paste("https://api.github.com/users/", followingLogin[j], sep = "")
+      following2 = GET(followingUrl2, gtoken)
+      followingContent2 = content(following2)
+      followingDF2 = jsonlite::fromJSON(jsonlite::toJSON(followingContent2))
+      
+      #Retrieve each users following
+      followingNumber = followingDF2$following
+      
+      #Retrieve each users followers
+      followersNumber = followingDF2$followers
+      
+      #Retrieve each users number of repositories
+      reposNumber = followingDF2$public_repos
+      
+      #Retrieve year which each user joined Github
+      yearCreated = substr(followingDF2$created_at, start = 1, stop = 4)
+      
+      #Add users data to a new row in dataframe
+      usersDB[nrow(usersDB) + 1, ] = c(followingLogin[j], followingNumber, followersNumber, reposNumber, yearCreated)
+      
+    }
+    next
+  }
+  #Stop when there are more than 400 users
+  if(length(users) > 400)
+  {
+    break
+  }
+  next
+}
+
+#Use plotly to graph
+Sys.setenv("plotly_username"="toconno5")
+Sys.setenv("plotly_api_key"="p8ytNJyBqfStHGdBUAxa")
+
+plot1 = plot_ly(data = usersDB, x = ~repos, y = ~followers, 
+                text = ~paste("Followers: ", followers, "<br>Repositories: ", 
+                              repos, "<br>Date Created:", dateCreated), color = ~dateCreated)
+plot1
 
 
