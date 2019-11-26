@@ -4,6 +4,9 @@ install.packages("httpuv")
 library(httpuv)
 #install.packages("httr")
 library(httr)
+install.packages("plotly")
+library(plotly)
+require(devtools)
 
 # Can be github, linkedin etc depending on application
 oauth_endpoints("github")
@@ -71,7 +74,11 @@ ebroderiData$bio
 
 #Part 2 - Visualisations
 
-myData = GET("https://api.github.com/users/laurastack9/followers?per_page=100;", gtoken)
+# My account is relatively new and unpopulated so I will choose another github user to 
+#produce more interesting graphs.
+# I have chosen to use Fabien Potencier (fabpot) simply through a quick google search of the most active github users
+
+myData = GET("https://api.github.com/users/fabpot/followers?per_page=100;", gtoken)
 stop_for_status(myData)
 extract = content(myData)
 #converts into dataframe
@@ -112,10 +119,10 @@ for(i in 1:length(user_ids))
   #Loop through 'following' users
   for (j in 1:length(followingLogin))
   {
-    #Check that the user is not already in the list of users
+    # Check that the user is not already in the list of users (duplicates)
     if (is.element(followingLogin[j], users) == FALSE)
     {
-      #Add user to list of users
+      #Add user to current list
       users[length(users) + 1] = followingLogin[j]
       
       #Retrieve data on each user
@@ -124,13 +131,13 @@ for(i in 1:length(user_ids))
       followingContent2 = content(following2)
       followingDF2 = jsonlite::fromJSON(jsonlite::toJSON(followingContent2))
       
-      #Retrieve each users following
+      #Retrieve who each user follows
       followingNumber = followingDF2$following
       
-      #Retrieve each users followers
+      #Retrieve each user's followers
       followersNumber = followingDF2$followers
       
-      #Retrieve each users number of repositories
+      #Retrieve each user's number of repositories
       reposNumber = followingDF2$public_repos
       
       #Retrieve year which each user joined Github
@@ -142,8 +149,8 @@ for(i in 1:length(user_ids))
     }
     next
   }
-  #Stop when there are more than 400 users
-  if(length(users) > 400)
+  #Stop when there are more than 250 users
+  if(length(users) > 250)
   {
     break
   }
@@ -151,12 +158,21 @@ for(i in 1:length(user_ids))
 }
 
 #Use plotly to graph
-Sys.setenv("plotly_username"="toconno5")
-Sys.setenv("plotly_api_key"="p8ytNJyBqfStHGdBUAxa")
+
+Sys.setenv("plotly_username"="laurastack9")
+Sys.setenv("plotly_api_key"="A18WaJelzCWzdLSTNxzM")
 
 plot1 = plot_ly(data = usersDB, x = ~repos, y = ~followers, 
                 text = ~paste("Followers: ", followers, "<br>Repositories: ", 
                               repos, "<br>Date Created:", dateCreated), color = ~dateCreated)
 plot1
+
+api_create(plot1, filename = "Repositories vs Followers")
+
+plot2 = plot_ly(data = usersDB, x = ~following, y = ~followers, text = ~paste("Followers: ", followers, "<br>Following: ", following), color = ~dateCreated)
+plot2
+
+api_create(plot2, filename = "Following vs Followers")
+
 
 
